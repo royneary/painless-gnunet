@@ -116,18 +116,18 @@ myself - HWTYD3P5D77JVFNVMZ1M5T10V4SZYNMY3PCGQCSVENKD6ZCRKPMG
 
 Now we add a public `A` record to our zone. It has the name "ccc", a value of "195.54.164.39" and it never expires.
 ```
-$ gnunet-namestore -z myzone -a -e never -p -t A -n ccc -V 195.54.164.39
+$ gnunet-namestore -z myself -a -e never -p -t A -n ccc -V 195.54.164.39
 ```
 
 Now we can query that record using the command line tool `gnunet-gns`.
 
 ```
-$ gnunet-gns -u ccc.myzone
-ccc.myzone:
+$ gnunet-gns -u ccc.myself
+ccc.myself:
 Got `A' record: 195.54.164.39
 ```
 
-So it worked! Now you can try to type "ccc.myzone" into your browser and see what website is behind the IP address.
+So it worked! Now you can try to type "ccc.myself" into your browser and see what website is behind the IP address.
 
 # Uninstall GNUnet and its dependencies
 ```
