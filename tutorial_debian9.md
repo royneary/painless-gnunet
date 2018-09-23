@@ -1,5 +1,5 @@
 # Introduction
-Welcome to the hopefully painless GNUnet tutorial for Debian 9 (and Ubuntu?)! It provides very concrete instructions on how to compile, install and configure a current version of GNUnet. The goal is to support newcomers, either end users or developers, who want to get in touch with GNUnet for the first time. After installing GNUnet we will make sure that out new GNUnet installation is working correctly.
+Welcome to the hopefully painless GNUnet tutorial for Debian 9! It provides very concrete instructions on how to compile, install and configure a current version of GNUnet. The goal is to support newcomers, either end users or developers, who want to get in touch with GNUnet for the first time. After installing GNUnet we will make sure that out new GNUnet installation is working correctly.
 
 **Attention: If you came across the official gnunet package for Debian 9, ignore it! It is ancient and not compatible with current GNUnet installations.**
 
@@ -67,7 +67,7 @@ $ make -j$(nproc || echo -n 1)
 $ sudo make install
 ```
 
-## Next: Install GNUnet plugin for name resolution
+## Install GNUnet plugin for name resolution
 So now it gets a bit nasty. It's not so bad. All we have to do is copy a file and edit another one. The file we need to copy is GNUnet's plugin for the Name Service Switch (NSS) in unix systems. Different unixes expect it in different locations and GNUnet's build system does not try to guess. On Debian 9 we have to do
 
 ```
@@ -77,16 +77,13 @@ $ sudo cp /usr/lib/gnunet/nss/libnss_gns.so.2 /lib/$(uname -m)-linux-gnu/
 The next step is activating the GNUnet plugin we just copied in the NSS config. It is located in `/etc/nsswitch.conf`. It should contain a line starting with "hosts" similar to this:
 
 ```
+$ cat /etc/nsswitch.conf
 hosts: files dns
 OR
 hosts: files mdns4_minimal [NOTFOUND=return] dns
 ```
-you can check this eg with 
-```
-$ cat /etc/nsswitch.conf
-```
 
-**Attention: Once we modified `etc/nsswitch.conf` DNS resolution will only be possible as long is GNUnet is running. We can leave the next step out, but then we will not be able to use GNUnet's name resolution in external applications.**
+**Attention: Once we modified `etc/nsswitch.conf` DNS resolution will only be possible as long as is GNUnet is running. We can leave the next step out, but then we will not be able to use GNUnet's name resolution in external applications.**
 
 We save a copy of the original file and then modify the line using sed:
 
@@ -192,7 +189,7 @@ So it worked! Now you can try to type "ccc.myself" into your browser and see wha
 ## filesharing
 Let's publish a file in the GNUnet filesharing network. We use tow keywords ("commons" and "state") so other people will be able to search for the file. 
 
-In this example we use "ostrom.pdf" but please take any other file you find worth publishing. "commons" and "state" are here the keywords to file and find the document. So add whatever you find relevant for your document in the form "-k <keyword>" 
+We can choose any file and describe it with meaningful keywords (using the `-k` command line option).
 
 ```
 $ gnunet-publish -k commons -k state ostrom.pdf
@@ -258,32 +255,27 @@ TBD
 
 ## You can't reach other people's nodes
 
-Should your computer not have reached the open GNUnet network automatically, you can manually instruct your node how to reach the nodes of your friends. This works by exchanging HELLO strings. This is how you get a hello string for your computer.
+Should our computer not have reached the open GNUnet network automatically, we can manually instruct our node how to reach the nodes of our friends. This works by exchanging HELLO strings. This is how we get a hello string for our computer.
 
 ```
 $ gnunet-peerinfo -gn
 ```
 
-You can now pass this string to your friends "out of band" (using whatever existing chat or messaging technology). If the string contains some private IP networks you don't want to share, you can carefully edit them out.
+We can now pass this string to our friends "out of band" (using whatever existing chat or messaging technology). If the string contains some private IP networks we don't want to share, we can carefully edit them out.
 
-Once you receive such strings from your friends, you can add them like this:
+Once we receive such strings from our friends, we can add them like this:
 
 ```
  gnunet-peerinfo -p <string>
 ```
     
-Now your GNUnet nodes can attempt reaching each other directly. This may still fail due to NAT traversal issues.
+Now our GNUnet nodes can attempt reaching each other directly. This may still fail due to NAT traversal issues.
 
 
 ## OMG you guys broke my internet
 
-replace the nesswitch with the old one, ideally backup the one for gnunet
+We can replace `/etc/nsswitch.conf` with the backup we made earlier (`/etc/nsswitch.conf.original`). Now DNS resolution should work again without a running GNUnet.
 
-$ cp /etc/nsswitch.conf /etc/nsswitch.conf.gnunet
+```
 $ cp /etc/nsswitch.conf.original /etc/nsswitch.conf
-
-and backwards: 
-
-$ cp /etc/nsswitch.conf.gnunet /etc/nsswitch.conf
-
-
+```
