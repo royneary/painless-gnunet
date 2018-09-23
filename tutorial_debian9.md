@@ -9,7 +9,7 @@ Now let's start!
 First let's install the following Debian 9 packages to use GNUnet painlessly. Optional dependencies are listed in Appendix A. They are required for some experimental GNUnet features.
 
 ```
-$ sudo apt install git libtool autoconf autopoint build-essential libgcrypt-dev libidn11-dev zlib1g-dev libunistring-dev libglpk-dev miniupnpc libextractor-dev libjannson-dev libcurl4-gnutls-dev
+$ sudo apt install git libtool autoconf autopoint build-essential libgcrypt-dev libidn11-dev zlib1g-dev libunistring-dev libglpk-dev miniupnpc libextractor-dev libjansson-dev libcurl4-gnutls-dev libsqlite3-dev
 ```
 
 # Make an installation directory
@@ -20,7 +20,7 @@ $ mkdir ~/gnunet_installation
 ```
 
 # Get the source code
-We download the GNUnet source code using git. On Debian 9 we need the sources of another library (libmicrohttpd). There exists a Debian package for libmicrohttpd too, but it is too old.
+We download the GNUnet source code using git. On Debian 9 we need the sources of another library (libmicrohttpd). There exists a Debian 9 package for libmicrohttpd too, but it is too old.
 
 ```
 $ cd ~/gnunet_installation
@@ -46,7 +46,7 @@ Now it's finally time to compile and install GNUnet. We have two options: instal
 ## Option 1: GNUnet for production
 ```
 $ ./bootstrap
-$ export GNUNET_PREFIX=~/usr
+$ export GNUNET_PREFIX=/usr
 $ ./configure --prefix=$GNUNET_PREFIX --disable-documentation --with-microhttpd=/opt/libmicrohttpd/lib
 $ sudo addgroup gnunetdns
 $ sudo adduser --system --group --disabled-login --home /var/lib/gnunet gnunet
@@ -57,7 +57,7 @@ $ sudo make install
 ## Option 2: GNUnet for development
 ```
 $ ./bootstrap
-$ export GNUNET_PREFIX=~/usr
+$ export GNUNET_PREFIX=/usr
 $ export CFLAGS="-g -Wall -O0"
 $ ./configure --prefix=$GNUNET_PREFIX --disable-documentation --enable-logging=verbose --with-microhttpd=/opt/libmicrohttpd/lib
 $ make -j4 # replace 4 with the number of available CPU cores
@@ -68,7 +68,7 @@ $ sudo make install
 So now it gets nasty. It's not so bad. All we have to do is copy a file and edit another one. The file we need to copy is GNUnet's plugin for the Name Service Switch (NSS) in unix systems. Different unixes expect it in different locations and GNUnet's build system does not try to guess. On Debian 9 we have to do
 
 ```
-$ cp /usr/local/lib/gnunet/nss/libnss_gns.so.2 /lib/$(uname -m)-linux-gnu/
+$ sudo cp /usr/lib/gnunet/nss/libnss_gns.so.2 /lib/$(uname -m)-linux-gnu/
 ```
 
 The next step is activating the GNUnet plugin we just copied in the NSS config. It is located in `/etc/nsswitch.conf`. It should contain a line starting with "hosts" similar to this:
