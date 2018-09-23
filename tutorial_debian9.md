@@ -178,7 +178,7 @@ $ cd ~/gnunet_installation/gnunet
 $ sudo make uninstall
 $ cd ~/gnunet_installation/libmicrohttpd
 $ sudo make uninstall
-$ sudo apt remove git libtool autoconf autopoint build-essential libgcrypt-dev libidn11-dev zlib1g-dev libunistring-dev libglpk-dev miniupnpc libextractor-dev libjannson-dev libcurl4-gnutls-dev
+$ sudo apt remove git libtool autoconf autopoint build-essential libgcrypt-dev libidn11-dev zlib1g-dev libunistring-dev libglpk-dev miniupnpc libextractor-dev libjansson-dev libcurl4-gnutls-dev libsqlite3-dev
 $ sudo apt autoremove
 $ sudo userdel -r gnunet
 $ sudo groupdel gnunet
