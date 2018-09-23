@@ -28,7 +28,7 @@ $ git clone https://gnunet.org/git/gnunet.git
 ```
 
 # Compile and Install
-It's not hard, it only requires one little nasty step which involves modifying an important config file of the operating system. So we'll pay extra attention while doing this.
+Installing GNUnet is not hard, it only requires one little nasty step which involves modifying an important config file of the operating system. So we'll pay extra attention while doing this.
 
 We have two options: installing a *production version* and installing a *development version*. If you want to start writing GNUnet applications or join the GNUnet development choose the development version (it will print more debug output and contains debug symbols that can be displayed with a debugger). Otherwise choose the production version.
  
