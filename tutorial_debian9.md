@@ -1,5 +1,5 @@
 # Introduction
-Welcome to the painless GNUnet tutorial for Debian 9! It provides very concrete instructions on how to compile, install and configure a current version of GNUnet. The goal is to support newcomers, either end users or developers, who want to get in touch with GNUnet for the first time. After installing GNUnet we will make sure that out new GNUnet installation is working correctly.
+Welcome to the hopefully painless GNUnet tutorial for Debian 9 (and Ubuntu?)! It provides very concrete instructions on how to compile, install and configure a current version of GNUnet. The goal is to support newcomers, either end users or developers, who want to get in touch with GNUnet for the first time. After installing GNUnet we will make sure that out new GNUnet installation is working correctly.
 
 **Attention: If you came across the official gnunet package for Debian 9, ignore it! It is ancient and not compatible with current GNUnet installations.**
 
@@ -24,8 +24,8 @@ We download the GNUnet source code using git. On Debian 9 we need the sources of
 
 ```
 $ cd ~/gnunet_installation
-$ git clone https://gnunet.org/git/gnunet.git
-$ git clone https://gnunet.org/git/libmicrohttpd.git
+$ git clone --depth 1 https://gnunet.org/git/gnunet.git
+$ git clone --depth 1 https://gnunet.org/git/libmicrohttpd.git
 ```
 
 # Compile and Install
@@ -36,36 +36,39 @@ Before we can compile GNUnet, we compile and install libmicrohttpd.
 ```
 $ cd ~/gnunet_installation/libmicrohttpd
 $ autoreconf -fi
+$ sudo apt install libgnutls28-dev
 $ ./configure --disable-doc --prefix=/opt/libmicrohttpd
-$ make -j4 # replace 4 with the number of available CPU cores
+$ make -j$(nproc || echo -n 1)
 $ sudo make install
 ```
 
 Now it's finally time to compile and install GNUnet. We have two options: installing a *production version* and installing a *development version*. If you want to start writing GNUnet applications or join the GNUnet development choose the development version (it will print more debug output and contains debug symbols that can be displayed with a debugger). Otherwise choose the production version.
  
-## Option 1: GNUnet for production
+## Option 1: GNUnet for production / usage
 ```
+$ cd ~/gnunet_installation/gnunet
 $ ./bootstrap
 $ export GNUNET_PREFIX=/usr
-$ ./configure --prefix=$GNUNET_PREFIX --disable-documentation --with-microhttpd=/opt/libmicrohttpd/lib
+$ ./configure --prefix=$GNUNET_PREFIX --disable-documentation --with-microhttpd=/opt/libmicrohttpd
 $ sudo addgroup gnunetdns
 $ sudo adduser --system --group --disabled-login --home /var/lib/gnunet gnunet
-$ make -j4 # replace 4 with the number of available CPU cores
+$ make -j$(nproc || echo -n 1)
 $ sudo make install
 ```
 
 ## Option 2: GNUnet for development
 ```
+$ cd ~/gnunet_installation/gnunet
 $ ./bootstrap
 $ export GNUNET_PREFIX=/usr
 $ export CFLAGS="-g -Wall -O0"
-$ ./configure --prefix=$GNUNET_PREFIX --disable-documentation --enable-logging=verbose --with-microhttpd=/opt/libmicrohttpd/lib
-$ make -j4 # replace 4 with the number of available CPU cores
+$ ./configure --prefix=$GNUNET_PREFIX --disable-documentation --enable-logging=verbose --with-microhttpd=/opt/libmicrohttpd
+$ make -j$(nproc || echo -n 1)
 $ sudo make install
 ```
 
-## Nasty step: Install GNUnet plugin for name resolution
-So now it gets nasty. It's not so bad. All we have to do is copy a file and edit another one. The file we need to copy is GNUnet's plugin for the Name Service Switch (NSS) in unix systems. Different unixes expect it in different locations and GNUnet's build system does not try to guess. On Debian 9 we have to do
+## Next: Install GNUnet plugin for name resolution
+So now it gets a bit nasty. It's not so bad. All we have to do is copy a file and edit another one. The file we need to copy is GNUnet's plugin for the Name Service Switch (NSS) in unix systems. Different unixes expect it in different locations and GNUnet's build system does not try to guess. On Debian 9 we have to do
 
 ```
 $ sudo cp /usr/lib/gnunet/nss/libnss_gns.so.2 /lib/$(uname -m)-linux-gnu/
@@ -75,6 +78,12 @@ The next step is activating the GNUnet plugin we just copied in the NSS config. 
 
 ```
 hosts: files dns
+OR
+hosts: files mdns4_minimal [NOTFOUND=return] dns
+```
+you can check this eg with 
+```
+$ cat /etc/nsswitch.conf
 ```
 
 **Attention: Once we modified `etc/nsswitch.conf` DNS resolution will only be possible as long is GNUnet is running. We can leave the next step out, but then we will not be able to use GNUnet's name resolution in external applications.**
@@ -84,12 +93,16 @@ We save a copy of the original file and then modify the line using sed:
 ```
 $ sudo cp /etc/nsswitch.conf /etc/nsswitch.conf.original
 $ sudo sed -i -E 's/^(hosts:\s+files) dns/\1 gns [NOTFOUND=return] dns/' /etc/nsswitch.conf
+OR
+$ sudo sed -i -E 's/^(hosts:\s+files mdns4_minimal) (.NOTFOUND.return. dns)/\1 gns \2/' /etc/nsswitch.conf
 ```
 
 Now in the line starting with "hosts" should contain an entry for "gns" like this:
 
 ```
 hosts: files gns [NOTFOUND=return] dns
+OR
+hosts: files mdns4_minimal gns [NOTFOUND=return] dns
 ```
 
 That's it. It wasn't that nasty, was it?
@@ -148,6 +161,7 @@ Let's try some of GNUnet's components: gns, filesharing, CADET and VPN.
 
 ## GNS
 First let's try out GNS, the GNU name service. We'll publish an IP address in a GNS record and try to resolve it using our browser. First we need an identity which is the equivalent to a zone in DNS. We'll call it "myself" and create it using the `gnunet-identity` command line tool. 
+Instead of "myself" you can surely use your nick or any other name. 
 
 ```
 $ gnunet-identity -C myself
@@ -173,10 +187,12 @@ ccc.myself:
 Got `A' record: 195.54.164.39
 ```
 
-So it worked! Now you can try to type "ccc.myself" into your browser and see what website is behind the IP address.
+So it worked! Now you can try to type "ccc.myself" into your browser and see what website is behind the IP address. (If it doesnt work use the IP directly ;p)
 
 ## filesharing
-Let's publish a file in the GNUnet filesharing network. We use tow keywords ("commons" and "state") so other people will be able to search for the file.
+Let's publish a file in the GNUnet filesharing network. We use tow keywords ("commons" and "state") so other people will be able to search for the file. 
+
+In this example we use "ostrom.pdf" but please take any other file you find worth publishing. "commons" and "state" are here the keywords to file and find the document. So add whatever you find relevant for your document in the form "-k <keyword>" 
 
 ```
 $ gnunet-publish -k commons -k state ostrom.pdf
@@ -184,7 +200,7 @@ Publishing `/home/myself/ostrom.pdf' done.
 URI is `gnunet://fs/chk/M57SXDJ72EWS25CT6307KKJ8K0GCNSPTAZ649NA1NS10MJB4A1GZ9EN4Y02KST9VA5BHE8B335RPXQVBWVZ587Y83WQ7J3DHMBX30Q8.DHNGBN4CB2DBX1QRZ1R0B1Q18WTEAK4R94S9D57C9JMJJ3H7SSQDCV4D1218C4S2VP085AMQQSMG18FCP6NQMZQZJ91XR5NBX7YF0V0.42197237'.
 ```
 
-Finding the file by keyworld works with `gnunet-search`.
+Finding the file by keyword works with `gnunet-search`.
 
 ```
 $ gnunet-search commons
@@ -194,7 +210,9 @@ gnunet-download -o "ostrom.pdf" gnunet://fs/chk/M57SXDJ72EWS25CT6307KKJ8K0GCNSPT
 
 It gives us the command line call to download the file (and store it as ostrom.pdf)!
 
-## CADET
+
+## CADET (and Chat)
+
 We can use the `gnunet-cadet` command line tool to open a port and from another machine connect to this port and chat or transfer data. First we need our *peer ID* of the GNUnet peer opening the port.
 
 ```
@@ -235,3 +253,37 @@ $ sudo rm /lib/$(uname -m)-linux-gnu/libnss_gns.so.2
 
 # Appendix A: Optional GNUnet features
 TBD
+
+# Troubleshooting
+
+## You can't reach other people's nodes
+
+Should your computer not have reached the open GNUnet network automatically, you can manually instruct your node how to reach the nodes of your friends. This works by exchanging HELLO strings. This is how you get a hello string for your computer.
+
+```
+$ gnunet-peerinfo -gn
+```
+
+You can now pass this string to your friends "out of band" (using whatever existing chat or messaging technology). If the string contains some private IP networks you don't want to share, you can carefully edit them out.
+
+Once you receive such strings from your friends, you can add them like this:
+
+```
+ gnunet-peerinfo -p <string>
+```
+    
+Now your GNUnet nodes can attempt reaching each other directly. This may still fail due to NAT traversal issues.
+
+
+## OMG you guys broke my internet
+
+replace the nesswitch with the old one, ideally backup the one for gnunet
+
+$ cp /etc/nsswitch.conf /etc/nsswitch.conf.gnunet
+$ cp /etc/nsswitch.conf.original /etc/nsswitch.conf
+
+and backwards: 
+
+$ cp /etc/nsswitch.conf.gnunet /etc/nsswitch.conf
+
+
