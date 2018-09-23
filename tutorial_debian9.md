@@ -144,6 +144,8 @@ $ gnunet-arm -e
 ```
 
 # Make sure it works
+Let's try some of GNUnet's components: gns, filesharing, CADET and VPN.
+
 ## GNS
 First let's try out GNS, the GNU name service. We'll publish an IP address in a GNS record and try to resolve it using our browser. First we need an identity which is the equivalent to a zone in DNS. We'll call it "myself" and create it using the `gnunet-identity` command line tool. 
 
@@ -172,6 +174,48 @@ Got `A' record: 195.54.164.39
 ```
 
 So it worked! Now you can try to type "ccc.myself" into your browser and see what website is behind the IP address.
+
+## filesharing
+Let's publish a file in the GNUnet filesharing network. We use tow keywords ("commons" and "state") so other people will be able to search for the file.
+
+```
+$ gnunet-publish -k commons -k state ostrom.pdf
+Publishing `/home/myself/ostrom.pdf' done.
+URI is `gnunet://fs/chk/M57SXDJ72EWS25CT6307KKJ8K0GCNSPTAZ649NA1NS10MJB4A1GZ9EN4Y02KST9VA5BHE8B335RPXQVBWVZ587Y83WQ7J3DHMBX30Q8.DHNGBN4CB2DBX1QRZ1R0B1Q18WTEAK4R94S9D57C9JMJJ3H7SSQDCV4D1218C4S2VP085AMQQSMG18FCP6NQMZQZJ91XR5NBX7YF0V0.42197237'.
+```
+
+Finding the file by keyworld works with `gnunet-search`.
+
+```
+$ gnunet-search commons
+#1:
+gnunet-download -o "ostrom.pdf" gnunet://fs/chk/M57SXDJ72EWS25CT6307KKJ8K0GCNSPTAZ649NA1NS10MJB4A1GZ9EN4Y02KST9VA5BHE8B335RPXQVBWVZ587Y83WQ7J3DHMBX30Q8.DHNGBN4CB2DBX1QRZ1R0B1Q18WTEAK4R94S9D57C9JMJJ3H7SSQDCV4D1218C4S2VP085AMQQSMG18FCP6NQMZQZJ91XR5NBX7YF0V0.42197237
+```
+
+It gives us the command line call to download the file (and store it as ostrom.pdf)!
+
+## CADET
+We can use the `gnunet-cadet` command line tool to open a port and from another machine connect to this port and chat or transfer data. First we need our *peer ID* of the GNUnet peer opening the port.
+
+```
+$ gnunet-peerinfo -s
+I am peer `P4T5GHS1PCZ06R82D3KW8Z8J1113BQZWAWGYHTZ8G1ZXMWXQGAVG'.
+```
+
+Now we open the port (it can be any string!):
+
+```
+$ gnunet-cadet -o my-secret-port
+```
+
+On the other machine we can connect using the peer ID and the port and start chatting!
+
+```
+$ gnunet-cadet P4T5GHS1PCZ06R82D3KW8Z8J1113BQZWAWGYHTZ8G1ZXMWXQGAVG my-secret-port
+```
+
+## VPN
+TBD
 
 # Uninstall GNUnet and its dependencies
 ```
