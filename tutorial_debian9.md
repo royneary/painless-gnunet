@@ -99,7 +99,50 @@ Congratulations! GNUnet is now installed! Before we start it we need to create a
 touch ~/.config/gnunet.conf
 ```
 
+Now we can start it with the command line tool `gnunet-arm` (Automatic Restart Manager).
+
+```
+gnunet-arm -s
+```
+
+It starts the default GNUnet services. We can list them with the `-I` option:
+
+```
+gnunet-arm -I
+Running services:
+ats (gnunet-service-ats)
+revocation (gnunet-service-revocation)
+set (gnunet-service-set)
+nat (gnunet-service-nat)
+transport (gnunet-service-transport)
+peerstore (gnunet-service-peerstore)
+hostlist (gnunet-daemon-hostlist)
+identity (gnunet-service-identity)
+namecache (gnunet-service-namecache)
+peerinfo (gnunet-service-peerinfo)
+datastore (gnunet-service-datastore)
+zonemaster (gnunet-service-zonemaster)
+zonemaster-monitor (gnunet-service-zonemaster-monitor)
+nse (gnunet-service-nse)
+cadet (gnunet-service-cadet)
+dht (gnunet-service-dht)
+core (gnunet-service-core)
+gns (gnunet-service-gns)
+statistics (gnunet-service-statistics)
+topology (gnunet-daemon-topology)
+fs (gnunet-service-fs)
+namestore (gnunet-service-namestore)
+vpn (gnunet-service-vpn)
+```
+
+For stopping GNUnet again we can use the `-e` option.
+
+```
+gnunet-arm -e
+```
+
 # Make sure it works
+## 
 ## GNS
 First let's try out GNS, the GNU name service. We'll publish an IP address in a GNS record and try to resolve it using our browser. First we need an identity which is the equivalent to a zone in DNS. We'll call it "myself" and create it using the `gnunet-identity` command line tool. 
 
