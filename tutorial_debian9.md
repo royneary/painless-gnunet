@@ -74,12 +74,10 @@ So now it gets a bit nasty. It's not so bad. All we have to do is copy a file an
 $ sudo cp /usr/lib/gnunet/nss/libnss_gns.so.2 /lib/$(uname -m)-linux-gnu/
 ```
 
-The next step is activating the GNUnet plugin we just copied in the NSS config. It is located in `/etc/nsswitch.conf`. It should contain a line starting with "hosts" similar to this:
+The next step is activating the GNUnet plugin we just copied in the NSS config. It is located in `/etc/nsswitch.conf`. It should contain a line starting with "hosts" similar to this (at least "files" and "dns" should be there):
 
 ```
 $ cat /etc/nsswitch.conf
-hosts: files dns
-OR
 hosts: files mdns4_minimal [NOTFOUND=return] dns
 ```
 
@@ -89,17 +87,13 @@ We save a copy of the original file and then modify the line using sed:
 
 ```
 $ sudo cp /etc/nsswitch.conf /etc/nsswitch.conf.original
-$ sudo sed -i -E 's/^(hosts:\s+files) dns/\1 gns [NOTFOUND=return] dns/' /etc/nsswitch.conf
-OR
-$ sudo sed -i -E 's/^(hosts:\s+files mdns4_minimal) (.NOTFOUND.return. dns)/\1 gns \2/' /etc/nsswitch.conf
+$ sudo sed -i -E 's/^(hosts:.*) dns/\1 gns [NOTFOUND=return] dns/' /etc/nsswitch.conf 
 ```
 
-Now in the line starting with "hosts" should contain an entry for "gns" like this:
+Now in the line starting with "hosts" should contain an entry "gns [NOTFOUND=return]" before the "dns" entry like this:
 
 ```
-hosts: files gns [NOTFOUND=return] dns
-OR
-hosts: files mdns4_minimal gns [NOTFOUND=return] dns
+hosts: files mdns4_minimal [NOTFOUND=return] gns [NOTFOUND=return] dns
 ```
 
 That's it. It wasn't that nasty, was it?
