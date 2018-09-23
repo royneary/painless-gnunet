@@ -77,6 +77,8 @@ The next step is activating the GNUnet plugin we just copied in the NSS config. 
 hosts: files dns
 ```
 
+**Attention: Once we modified `etc/nsswitch.conf` DNS resolution will only be possible as long is GNUnet is running. We can leave the next step out, but then we will not be able to use GNUnet's name resolution in external applications.**
+
 We save a copy of the original file and then modify the line using sed:
 
 ```
@@ -142,7 +144,6 @@ $ gnunet-arm -e
 ```
 
 # Make sure it works
-## 
 ## GNS
 First let's try out GNS, the GNU name service. We'll publish an IP address in a GNS record and try to resolve it using our browser. First we need an identity which is the equivalent to a zone in DNS. We'll call it "myself" and create it using the `gnunet-identity` command line tool. 
 
